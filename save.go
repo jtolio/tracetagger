@@ -75,7 +75,7 @@ func SaveTrace(spans []*collect.FinishedSpan, capped bool, path string) error {
 
 	duration := end.Sub(spans[0].Span.Start())
 
-	filename := filepath.Join(dir, fmt.Sprintf("%d-%d", time.Now().UnixNano(), duration.Nanoseconds()))
+	filename := filepath.Join(dir, fmt.Sprintf("%d-%d", duration.Nanoseconds(), time.Now().UnixNano()))
 	if capped {
 		filename += "-capped"
 	}
