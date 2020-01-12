@@ -18,12 +18,33 @@ import (
 
 // SaveTracesWithTag saves all traces with the tag into the provided path as a folder
 func SaveTracesWithTag(tag interface{}, justTaggedSpans bool, traceMax int, path string) (cancel func()) {
-	return TracesWithTag(tag, justTaggedSpans, traceMax, func(spans []*collect.FinishedSpan, capped bool) {
+	return TracesWithTag(tag, traceMax, func(spans []*collect.FinishedSpan, capped bool) {
+		if justTaggedSpans {
+			spans = JustTaggedSpans(spans, tag)
+		}
 		err := SaveTrace(spans, capped, path)
 		if err != nil {
 			log.Print(err)
 		}
 	})
+}
+
+// JustTaggedSpans filters a list of spans to just the ones that are explicitly
+// tagged. It also keeps the first span either way, as that is probably the best
+// name for the trace.
+func JustTaggedSpans(spans []*collect.FinishedSpan, tag interface{}) (rv []*collect.FinishedSpan) {
+	if len(spans) == 0 {
+		return spans
+	}
+	collect.StartTimeSorter(spans).Sort()
+	rv = make([]*collect.FinishedSpan, 0, len(spans))
+	rv = append(rv, spans[0])
+	for _, s := range spans[1:] {
+		if IsSpanTagged(s.Span, tag) {
+			rv = append(rv, s)
+		}
+	}
+	return rv
 }
 
 func sanitize(val string) string {

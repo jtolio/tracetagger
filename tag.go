@@ -28,7 +28,14 @@ func tagSpan(s *monkit.Span, tag interface{}) {
 	s.Trace().Set(spanTag{tag: tag, span: s}, true)
 }
 
-func isTaggedSpan(s *monkit.Span, tag interface{}) bool {
+// IsTraceTagged returns true if any span in the trace got tagged.
+func IsTraceTagged(t *monkit.Trace, tag interface{}) bool {
+	tagged, ok := t.Get(tag).(bool)
+	return ok && tagged
+}
+
+// IsSpanTagged returns true if this specific Span got tagged.
+func IsSpanTagged(s *monkit.Span, tag interface{}) bool {
 	tagged, ok := s.Trace().Get(spanTag{tag: tag, span: s}).(bool)
 	return ok && tagged
 }
