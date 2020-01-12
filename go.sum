@@ -1,0 +1,4 @@
+github.com/spacemonkeygo/monotime v0.0.0-20180824235756-e3f48a95f98a h1:8+cCjxhToanKmxLIbuyBNe2EnpgwhiivsIaRJstDRFA=
+github.com/spacemonkeygo/monotime v0.0.0-20180824235756-e3f48a95f98a/go.mod h1:ul4bvvnCOPZgq8w0nTkSmWVg/hauVpFS97Am1YM1XXo=
+gopkg.in/spacemonkeygo/monkit.v2 v2.0.0-20190623001553-09813957f0a8 h1:nyw4hxw2zz4S0EHqr5nQfA3zGbMFJDRJlQPM4PCb7O4=
+gopkg.in/spacemonkeygo/monkit.v2 v2.0.0-20190623001553-09813957f0a8/go.mod h1:6UQdi0rNB4YDNwVYP8fJNmjLNaU8MA84WCdXStx3Spo=
