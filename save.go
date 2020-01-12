@@ -22,7 +22,7 @@ func SaveTracesWithTag(tag interface{}, justTaggedSpans bool, traceMax int, path
 		if justTaggedSpans {
 			spans = JustTaggedSpans(spans, tag)
 		}
-		err := SaveTrace(spans, capped, path)
+		err := SaveTrace(spans, capped, filepath.Join(path, TracePathPrefix(spans, capped)))
 		if err != nil {
 			log.Print(err)
 		}
@@ -65,10 +65,10 @@ func safechar(r rune) rune {
 	return '_'
 }
 
-// SaveTrace saves a trace to a folder
-func SaveTrace(spans []*collect.FinishedSpan, capped bool, path string) error {
+// TracePathPrefix returns a relative path for the trace with everything but the extension
+func TracePathPrefix(spans []*collect.FinishedSpan, capped bool) string {
 	if len(spans) == 0 {
-		return nil
+		return ""
 	}
 
 	collect.StartTimeSorter(spans).Sort()
@@ -79,7 +79,7 @@ func SaveTrace(spans []*collect.FinishedSpan, capped bool, path string) error {
 	for _, s := range spans {
 		_, err := hash.Write([]byte(s.Span.Func().FullName() + "\x00"))
 		if err != nil {
-			return err
+			panic(err)
 		}
 		if end.IsZero() || s.Finish.After(end) {
 			end = s.Finish
@@ -87,22 +87,29 @@ func SaveTrace(spans []*collect.FinishedSpan, capped bool, path string) error {
 	}
 	funcHash := hex.EncodeToString(hash.Sum(nil))
 
-	dir := filepath.Join(path, traceName, funcHash)
-
-	err := os.MkdirAll(dir, 0777)
-	if err != nil {
-		return err
-	}
-
+	dir := filepath.Join(traceName, funcHash)
 	duration := end.Sub(spans[0].Span.Start())
-
 	filename := filepath.Join(dir, fmt.Sprintf("%d-%d", duration.Nanoseconds(), time.Now().UnixNano()))
 	if capped {
 		filename += "-capped"
 	}
 
+	return filename
+}
+
+// SaveTrace saves a trace to pathPrefix with ".json" or ".svg" added.
+func SaveTrace(spans []*collect.FinishedSpan, capped bool, pathPrefix string) error {
+	if len(spans) == 0 {
+		return nil
+	}
+
+	err := os.MkdirAll(filepath.Dir(pathPrefix), 0777)
+	if err != nil {
+		return err
+	}
+
 	save := func(saver func(io.Writer, []*collect.FinishedSpan) error, extension string) error {
-		fh, err := os.Create(filename + extension)
+		fh, err := os.Create(pathPrefix + extension)
 		if err != nil {
 			return err
 		}
