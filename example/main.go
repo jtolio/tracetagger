@@ -71,7 +71,7 @@ func main() {
 	var mtx sync.Mutex
 	mtx.Lock()
 
-	ccancel := tracetagger.TracesWithTag(dbTag, 1000, func(spans []*collect.FinishedSpan, capped bool) {
+	ccancel := tracetagger.TracesWithTag(dbTag, false, 1000, func(spans []*collect.FinishedSpan, capped bool) {
 		err := tracetagger.SaveTrace(spans, capped, "./traces/")
 		if err != nil {
 			log.Print(err)

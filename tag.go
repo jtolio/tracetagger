@@ -14,8 +14,23 @@ func Tag(ctx context.Context, tag interface{}) bool {
 	if span == nil {
 		return false
 	}
-	span.Trace().Set(tag, true)
+	tagSpan(span, tag)
 	return true
+}
+
+type spanTag struct {
+	tag  interface{}
+	span *monkit.Span
+}
+
+func tagSpan(s *monkit.Span, tag interface{}) {
+	s.Trace().Set(tag, true)
+	s.Trace().Set(spanTag{tag: tag, span: s}, true)
+}
+
+func isTaggedSpan(s *monkit.Span, tag interface{}) bool {
+	tagged, ok := s.Trace().Get(spanTag{tag: tag, span: s}).(bool)
+	return ok && tagged
 }
 
 var pkgTagsMtx sync.Mutex

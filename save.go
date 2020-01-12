@@ -17,8 +17,8 @@ import (
 )
 
 // SaveTracesWithTag saves all traces with the tag into the provided path as a folder
-func SaveTracesWithTag(tag interface{}, traceMax int, path string) (cancel func()) {
-	return TracesWithTag(tag, traceMax, func(spans []*collect.FinishedSpan, capped bool) {
+func SaveTracesWithTag(tag interface{}, justTaggedSpans bool, traceMax int, path string) (cancel func()) {
+	return TracesWithTag(tag, justTaggedSpans, traceMax, func(spans []*collect.FinishedSpan, capped bool) {
 		err := SaveTrace(spans, capped, path)
 		if err != nil {
 			log.Print(err)
