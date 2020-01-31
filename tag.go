@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	monkit "gopkg.in/spacemonkeygo/monkit.v2"
+	"github.com/spacemonkeygo/monkit/v3"
 )
 
 // Tag attempts to mark the current trace with the provided tag and if

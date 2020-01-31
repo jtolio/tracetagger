@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	monkit "gopkg.in/spacemonkeygo/monkit.v2"
-	"gopkg.in/spacemonkeygo/monkit.v2/collect"
+	"github.com/spacemonkeygo/monkit/v3"
+	"github.com/spacemonkeygo/monkit/v3/collect"
 
-	"github.com/jtolds/tracetagger"
+	"github.com/jtolds/tracetagger/v2"
 )
 
 var (

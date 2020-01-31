@@ -12,8 +12,8 @@ import (
 	"time"
 	"unicode"
 
-	"gopkg.in/spacemonkeygo/monkit.v2/collect"
-	"gopkg.in/spacemonkeygo/monkit.v2/present"
+	"github.com/spacemonkeygo/monkit/v3/collect"
+	"github.com/spacemonkeygo/monkit/v3/present"
 )
 
 // SaveTracesWithTag saves all traces with the tag into the provided path as a folder

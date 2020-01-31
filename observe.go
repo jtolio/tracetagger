@@ -6,8 +6,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	monkit "gopkg.in/spacemonkeygo/monkit.v2"
-	"gopkg.in/spacemonkeygo/monkit.v2/collect"
+	"github.com/spacemonkeygo/monkit/v3"
+	"github.com/spacemonkeygo/monkit/v3/collect"
 )
 
 type finishedSpanObserver func(ctx context.Context, s *collect.FinishedSpan)
