@@ -17,7 +17,7 @@ import (
 )
 
 // SaveTracesWithTag saves all traces with the tag into the provided path as a folder
-func SaveTracesWithTag(tag interface{}, justTaggedSpans bool, traceMax int, path string) (cancel func()) {
+func SaveTracesWithTag(tag *TagRef, justTaggedSpans bool, traceMax int, path string) (cancel func()) {
 	return TracesWithTag(tag, traceMax, func(spans []*collect.FinishedSpan, capped bool) {
 		if justTaggedSpans {
 			spans = JustTaggedSpans(spans, tag)
@@ -32,7 +32,7 @@ func SaveTracesWithTag(tag interface{}, justTaggedSpans bool, traceMax int, path
 // JustTaggedSpans filters a list of spans to just the ones that are explicitly
 // tagged. It also keeps the first span either way, as that is probably the best
 // name for the trace.
-func JustTaggedSpans(spans []*collect.FinishedSpan, tag interface{}) (rv []*collect.FinishedSpan) {
+func JustTaggedSpans(spans []*collect.FinishedSpan, tag *TagRef) (rv []*collect.FinishedSpan) {
 	if len(spans) == 0 {
 		return spans
 	}

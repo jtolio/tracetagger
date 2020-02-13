@@ -23,7 +23,7 @@ func (f finishedSpanObserver) Finish(ctx context.Context, s *monkit.Span, err er
 // trace exist), where at least one span was tagged with the provided tag.
 // It returns a cancel method that will stop new trace collection (existing
 // trace collection will keep running)
-func TracesWithTag(tag interface{}, traceMax int, observe func(spans []*collect.FinishedSpan, capped bool)) (cancel func()) {
+func TracesWithTag(tag *TagRef, traceMax int, observe func(spans []*collect.FinishedSpan, capped bool)) (cancel func()) {
 	handle := func(t *monkit.Trace) {
 		var mtx sync.Mutex
 
