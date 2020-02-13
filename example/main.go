@@ -6,19 +6,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/spacemonkeygo/monkit/v3"
+	monkit "github.com/spacemonkeygo/monkit/v3"
 	"github.com/spacemonkeygo/monkit/v3/collect"
 
-	"github.com/jtolds/tracetagger/v2"
+	tracetagger "github.com/jtolds/tracetagger/v2"
 )
 
 var (
 	mon = monkit.Package()
 )
 
-type dbTagT int
-
-var dbTag dbTagT = 1
+var dbTag = tracetagger.NewTagRef()
 
 func DoStep1(ctx context.Context) (err error) {
 	defer mon.Task()(&ctx)(&err)

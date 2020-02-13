@@ -5,7 +5,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/spacemonkeygo/monkit/v3"
+	monkit "github.com/spacemonkeygo/monkit/v3"
 )
 
 // TagRef represents a distinct tag reference
@@ -27,10 +27,9 @@ func NewTagRef() *TagRef {
 }
 
 // Enable enables the tag for tagging during the run of the function provided
-func (t *TagRef) Enable(fn func()) {
+func (t *TagRef) Enable() (disable func()) {
 	atomic.AddInt32(&t.enabled, 1)
-	defer atomic.AddInt32(&t.enabled, -1)
-	fn()
+	return func() { atomic.AddInt32(&t.enabled, -1) }
 }
 
 // Tag attempts to mark the current trace with the provided tag and if
