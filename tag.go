@@ -36,7 +36,7 @@ func (t *TagRef) Enable() (disable func()) {
 // successful, returns true. It will not tag the current trace if the
 // tag is not enabled. Tags are disabled by default.
 func Tag(ctx context.Context, tag *TagRef) bool {
-	if atomic.LoadInt32(&tag.enabled) > 0 {
+	if atomic.LoadInt32(&tag.enabled) <= 0 {
 		return false
 	}
 	span := monkit.SpanFromCtx(ctx)
