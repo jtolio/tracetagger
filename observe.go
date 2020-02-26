@@ -39,7 +39,7 @@ func TracesWithTag(tag *TagRef, traceMax int, observe func(spans []*collect.Fini
 				return
 			}
 
-			active := t.Spans() > 0 && atomic.LoadInt32(&allDone) == 0
+			active := atomic.LoadInt32(&allDone) == 0 && t.Spans() > 0
 
 			pkgTagsMtx.Lock()
 			if pkgTags[s.Span.Func().Scope()] == tag {
@@ -64,9 +64,7 @@ func TracesWithTag(tag *TagRef, traceMax int, observe func(spans []*collect.Fini
 
 			if !active {
 				atomic.StoreInt32(&done, 1)
-				if cancel != nil {
-					cancel()
-				}
+				cancel()
 				spansToObserve = spans
 			}
 			mtx.Unlock()
@@ -79,12 +77,8 @@ func TracesWithTag(tag *TagRef, traceMax int, observe func(spans []*collect.Fini
 		})
 
 		mtx.Lock()
-		defer mtx.Unlock()
-
 		cancel = t.ObserveSpansCtx(observer)
-		if atomic.LoadInt32(&done) == 1 {
-			cancel()
-		}
+		mtx.Unlock()
 	}
 
 	roots := map[*monkit.Trace]bool{}
