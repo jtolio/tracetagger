@@ -21,9 +21,11 @@ func (f finishedSpanObserver) Finish(ctx context.Context, s *monkit.Span, err er
 // TracesWithTag calls the provided observe callback with all spans that
 // belong to traces that are no longer running (no current spans with that
 // trace exist), where at least one span was tagged with the provided tag.
-// It returns a cancel method that will stop new trace collection (existing
-// trace collection will keep running)
+// It returns a cancel method that will stop new trace collection as well
+// as any currently collecting traces.
 func TracesWithTag(tag *TagRef, traceMax int, observe func(spans []*collect.FinishedSpan, capped bool)) (cancel func()) {
+	var allDone int32
+
 	handle := func(t *monkit.Trace) {
 		var mtx sync.Mutex
 
@@ -37,13 +39,7 @@ func TracesWithTag(tag *TagRef, traceMax int, observe func(spans []*collect.Fini
 				return
 			}
 
-			active := false
-			// this is the worst
-			monkit.Default.RootSpans(func(s *monkit.Span) {
-				if s.Trace() == t {
-					active = true
-				}
-			})
+			active := t.Spans() > 0 && atomic.LoadInt32(&allDone) == 0
 
 			pkgTagsMtx.Lock()
 			if pkgTags[s.Span.Func().Scope()] == tag {
@@ -68,7 +64,9 @@ func TracesWithTag(tag *TagRef, traceMax int, observe func(spans []*collect.Fini
 
 			if !active {
 				atomic.StoreInt32(&done, 1)
-				cancel()
+				if cancel != nil {
+					cancel()
+				}
 				spansToObserve = spans
 			}
 			mtx.Unlock()
@@ -81,8 +79,12 @@ func TracesWithTag(tag *TagRef, traceMax int, observe func(spans []*collect.Fini
 		})
 
 		mtx.Lock()
+		defer mtx.Unlock()
+
 		cancel = t.ObserveSpansCtx(observer)
-		mtx.Unlock()
+		if atomic.LoadInt32(&done) == 1 {
+			cancel()
+		}
 	}
 
 	roots := map[*monkit.Trace]bool{}
@@ -93,7 +95,10 @@ func TracesWithTag(tag *TagRef, traceMax int, observe func(spans []*collect.Fini
 		roots[s.Trace()] = true
 		handle(s.Trace())
 	})
-	cancel = monkit.Default.ObserveTraces(handle)
-	roots = nil
-	return cancel
+
+	cancelTraces := monkit.Default.ObserveTraces(handle)
+	return func() {
+		atomic.StoreInt32(&allDone, 1)
+		cancelTraces()
+	}
 }
